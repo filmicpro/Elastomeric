@@ -10,18 +10,18 @@ import Photos
 
 //MARK: Elastomeric Type Aliases
 
-typealias ElastomericEqualityEvaluation = ((_ lhs:Any?, _ rhs:Any?)->Bool)
-typealias ElastomericTypeViabilityEvaluation = ((_ value:Any?)->Bool)
-typealias ObserverBlock = ((_ mutation:ElastomericMutation)->Void)?
-typealias ObserverReceipt = UUID
+public typealias ElastomericEqualityEvaluation = ((_ lhs:Any?, _ rhs:Any?)->Bool)
+public typealias ElastomericTypeViabilityEvaluation = ((_ value:Any?)->Bool)
+public typealias ObserverBlock = ((_ mutation:ElastomericMutation)->Void)?
+public typealias ObserverReceipt = UUID
 
 //MARK: ElastomericObserver
 
-struct ElastomericObserver {
-    let receipt:ObserverReceipt
-    var inceptQueue:DispatchQueue, block:ObserverBlock
+public struct ElastomericObserver {
+    public let receipt:ObserverReceipt
+    public var inceptQueue:DispatchQueue, block:ObserverBlock
     
-    init(receipt:ObserverReceipt = UUID(), inceptQueue:DispatchQueue, block:ObserverBlock) {
+    public init(receipt:ObserverReceipt = UUID(), inceptQueue:DispatchQueue, block:ObserverBlock) {
         self.receipt = receipt
         self.inceptQueue = inceptQueue
         self.block = block
@@ -31,10 +31,10 @@ struct ElastomericObserver {
 //MARK: ElastomericMutation
 
 public struct ElastomericMutation {
-    var elastomer:Elastomer
-    var observerReceipt:ObserverReceipt
-    var oldValue:Any?, newValue:Any?
-    let timestamp:TimeInterval = CACurrentMediaTime()
+    public var elastomer:Elastomer
+    public var observerReceipt:ObserverReceipt
+    public var oldValue:Any?, newValue:Any?
+    public let timestamp:TimeInterval = CACurrentMediaTime()
 }
 
 //MARK: Elastomer
@@ -46,7 +46,7 @@ public struct Elastomer:Hashable {
     fileprivate let evaluateForEquality:ElastomericEqualityEvaluation
     fileprivate let evaluateForAssociatedType:ElastomericTypeViabilityEvaluation
     
-    init<T: Equatable>(associatedType:T.Type, name:String) {
+    public init<T: Equatable>(associatedType:T.Type, name:String) {
         self.hashValue = name.hashValue
         self.name = name
         self.evaluateForEquality = { lhs, rhs in return (lhs as? T) == (rhs as? T) }
@@ -58,35 +58,35 @@ public struct Elastomer:Hashable {
     }
     
     ///Add or Replace a value in the model
-    func stageValue(_ value:Any?, discardingRedundancy discardRedundant:Bool = true) {
+    public func stageValue(_ value:Any?, discardingRedundancy discardRedundant:Bool = true) {
         ElastomericArchive.stageValue(value, associatedWithElastomer: self, discardingRedundancy:discardRedundant)
     }
     
     ///Add or Replace a value in the model
-    func stageValue(_ value:Any?, afterDelay delay:TimeInterval, discardingRedundancy discardRedundant:Bool = true) {
+    public func stageValue(_ value:Any?, afterDelay delay:TimeInterval, discardingRedundancy discardRedundant:Bool = true) {
         DispatchQueue.underlying.asyncAfter(deadline: .now() + delay) {
             ElastomericArchive.stageValue(value, associatedWithElastomer: self, discardingRedundancy:discardRedundant)
         }
     }
 
     ///Express the current value associated with the elastomer
-    func expressValue(_ result:((Any?)->Void)?) {
+    public func expressValue(_ result:((Any?)->Void)?) {
         ElastomericArchive.expressValue(associatedWithElastomer: self, result: result)
     }
     
     ///Associate an observer with an Elastomer. A receipt will be returned
-    func registerObserver(_ block:ObserverBlock) -> ObserverReceipt {
+    public func registerObserver(_ block:ObserverBlock) -> ObserverReceipt {
         return ElastomericArchive.observeValue(associatedWithElastomer: self, observerBlock: block)
     }
     
     ///Retire associated observers
-    func retireObserver(_ receipt:ObserverReceipt?) {
+    public func retireObserver(_ receipt:ObserverReceipt?) {
         guard let receipt = receipt else { return }
         ElastomericArchive.observers[self]?[receipt] = nil
     }
     
     ///Post value to all observers after a delay
-    func post(afterDelay delay:TimeInterval = 0) {
+    public func post(afterDelay delay:TimeInterval = 0) {
         DispatchQueue.underlying.asyncAfter(deadline: .now() + delay) {
             ElastomericArchive.postValue(associatedWithElastomer: self)
         }
@@ -204,16 +204,16 @@ fileprivate struct ElastomericArchive {
     }
 }
 
-extension DispatchQueue {
-    static var underlying:DispatchQueue { return OperationQueue.current?.underlyingQueue ?? DispatchQueue.main }
+public extension DispatchQueue {
+    public static var underlying:DispatchQueue { return OperationQueue.current?.underlyingQueue ?? DispatchQueue.main }
 }
 
 //MARK: Elastomeric Batch Operations
 
-extension Sequence where Element == Elastomer {
+public extension Sequence where Element == Elastomer {
     
     ///Pull a group of Elastomer-associated values
-    func expressValues(_ result:(([Elastomer:Any])->Void)?) {
+    public func expressValues(_ result:(([Elastomer:Any])->Void)?) {
         
         //Capture incept queue
         let inceptQueue = DispatchQueue.underlying
@@ -232,7 +232,7 @@ extension Sequence where Element == Elastomer {
         }
     }
     
-    func registerObservers(_ block:ObserverBlock) -> [Elastomer:ObserverReceipt] {
+    public func registerObservers(_ block:ObserverBlock) -> [Elastomer:ObserverReceipt] {
         var receipts = [Elastomer:ObserverReceipt]()
         for elastomer in self {
             receipts[elastomer] = ElastomericArchive.observeValue(associatedWithElastomer: elastomer, observerBlock: block)
@@ -241,16 +241,16 @@ extension Sequence where Element == Elastomer {
     }
 }
 
-extension Dictionary where Key == Elastomer, Value == ObserverReceipt {
-    func retireAll() {
+public extension Dictionary where Key == Elastomer, Value == ObserverReceipt {
+    public func retireAll() {
         self.forEach { elastomer, receipt in
             ElastomericArchive.retireObserver(associatedWithElastomer: elastomer, receipt: receipt)
         }
     }
 }
 
-extension Dictionary where Key == Elastomer, Value == Any {
-    func stage() {
+public extension Dictionary where Key == Elastomer, Value == Any {
+    public func stage() {
         self.forEach { elastomer, value in
             ElastomericArchive.stageValue(value, associatedWithElastomer: elastomer, discardingRedundancy:true)
         }
