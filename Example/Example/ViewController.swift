@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Elastomeric
 
 //Elastomer declarations
 extension Elastomer {

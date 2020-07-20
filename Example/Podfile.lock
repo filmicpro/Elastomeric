@@ -1,0 +1,16 @@
+PODS:
+  - Elastomeric (0.1.2)
+
+DEPENDENCIES:
+  - Elastomeric (from `../`)
+
+EXTERNAL SOURCES:
+  Elastomeric:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  Elastomeric: 48c17b1b1cfc16e378a8eaa040950e8f25fc46fc
+
+PODFILE CHECKSUM: 22bd73c69a29e60b07d81ea70437b7642a9a180b
+
+COCOAPODS: 1.9.3

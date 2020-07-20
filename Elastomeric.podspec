@@ -19,6 +19,6 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '11.0'
 
-  s.source_files = 'Elastomeric/Elastomeric.swift'
+  s.source_files = 'Sources/Elastomeric.swift'
 
 end
