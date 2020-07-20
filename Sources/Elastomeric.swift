@@ -39,22 +39,22 @@ public struct ElastomericMutation {
 
 //MARK: Elastomer
 
-public struct Elastomer:Hashable {
+public struct Elastomer {
     
     public let name:String
-    public var hashValue:Int
+    private var nameHashValue:Int // only used for equality check
     fileprivate let evaluateForEquality:ElastomericEqualityEvaluation
     fileprivate let evaluateForAssociatedType:ElastomericTypeViabilityEvaluation
     
     public init<T: Equatable>(associatedType:T.Type, name:String) {
-        self.hashValue = name.hashValue
+        self.nameHashValue = name.hashValue
         self.name = name
         self.evaluateForEquality = { lhs, rhs in return (lhs as? T) == (rhs as? T) }
         self.evaluateForAssociatedType = { value in return value is T }
     }
     
     public static func ==(lhs: Elastomer, rhs: Elastomer) -> Bool {
-        return lhs.hashValue == rhs.hashValue
+        return lhs.nameHashValue == rhs.nameHashValue
     }
     
     ///Add or Replace a value in the model
@@ -90,6 +90,12 @@ public struct Elastomer:Hashable {
         DispatchQueue.underlying.asyncAfter(deadline: .now() + delay) {
             ElastomericArchive.postValue(associatedWithElastomer: self)
         }
+    }
+}
+
+extension Elastomer: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(self.nameHashValue)
     }
 }
 
@@ -205,7 +211,7 @@ fileprivate struct ElastomericArchive {
 }
 
 public extension DispatchQueue {
-    public static var underlying:DispatchQueue { return OperationQueue.current?.underlyingQueue ?? DispatchQueue.main }
+    static var underlying:DispatchQueue { return OperationQueue.current?.underlyingQueue ?? DispatchQueue.main }
 }
 
 //MARK: Elastomeric Batch Operations
@@ -213,7 +219,7 @@ public extension DispatchQueue {
 public extension Sequence where Element == Elastomer {
     
     ///Pull a group of Elastomer-associated values
-    public func expressValues(_ result:(([Elastomer:Any])->Void)?) {
+    func expressValues(_ result:(([Elastomer:Any])->Void)?) {
         
         //Capture incept queue
         let inceptQueue = DispatchQueue.underlying
@@ -232,7 +238,7 @@ public extension Sequence where Element == Elastomer {
         }
     }
     
-    public func registerObservers(_ block:ObserverBlock) -> [Elastomer:ObserverReceipt] {
+    func registerObservers(_ block:ObserverBlock) -> [Elastomer:ObserverReceipt] {
         var receipts = [Elastomer:ObserverReceipt]()
         for elastomer in self {
             receipts[elastomer] = ElastomericArchive.observeValue(associatedWithElastomer: elastomer, observerBlock: block)
@@ -242,7 +248,7 @@ public extension Sequence where Element == Elastomer {
 }
 
 public extension Dictionary where Key == Elastomer, Value == ObserverReceipt {
-    public func retireAll() {
+    func retireAll() {
         self.forEach { elastomer, receipt in
             ElastomericArchive.retireObserver(associatedWithElastomer: elastomer, receipt: receipt)
         }
@@ -250,7 +256,7 @@ public extension Dictionary where Key == Elastomer, Value == ObserverReceipt {
 }
 
 public extension Dictionary where Key == Elastomer, Value == Any {
-    public func stage() {
+    func stage() {
         self.forEach { elastomer, value in
             ElastomericArchive.stageValue(value, associatedWithElastomer: elastomer, discardingRedundancy:true)
         }

@@ -1,5 +1,5 @@
 PODS:
-  - Elastomeric (0.1.2)
+  - Elastomeric (0.2.0)
 
 DEPENDENCIES:
   - Elastomeric (from `../`)
@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  Elastomeric: 48c17b1b1cfc16e378a8eaa040950e8f25fc46fc
+  Elastomeric: 31f4923ddee1106a0e0aa769c1348cfca88fdbfd
 
 PODFILE CHECKSUM: 22bd73c69a29e60b07d81ea70437b7642a9a180b
 
